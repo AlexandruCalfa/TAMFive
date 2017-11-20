@@ -18,16 +18,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.app.service.entities.Benefit;
-import org.jboss.arquillian.transaction.api.annotation.Transactional;
-
 public class EntityRepositoryBase<T extends Object> implements EntityRepository<T> {
 
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	@PersistenceContext(unitName = "MSD")
+	@PersistenceContext(unitName="MSD")
 	protected EntityManager entityManager;
-
+	
 	protected Class<T> repositoryType;
 	protected String genericSQL;
 
@@ -35,40 +32,38 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
-
+	
 	public EntityRepositoryBase() {
 
 		logger.info("START DEFAULT INIT: ENTITY REPOSITORY ... ");
-
+		
 		this.repositoryType = getEntityParametrizedType();
 		logger.info("init repositoryType: " + repositoryType.getSimpleName());
-
-		this.genericSQL = "SELECT o FROM "
-				+ repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1) + " o";
-		logger.info("init generic JPAQL: " + genericSQL);
-
+		
+		this.genericSQL = "SELECT o FROM " + repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1)
+				+ " o";
+		logger.info("init generic JPAQL: " + genericSQL);		
+		
 		logger.info("... END DEFAULT INIT: ENTITY REPOSITORY!");
 	}
-
+	
 	public EntityRepositoryBase(EntityManager em, Class<T> t) {
 		this.entityManager = em;
 		this.repositoryType = t;
-		genericSQL = "SELECT o FROM "
-				+ repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1) + " o";
+		genericSQL = "SELECT o FROM " + repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1)
+				+ " o";
 		logger.info("generic JPAQL: " + genericSQL);
 	}
 
 	public EntityRepositoryBase(Class<T> t) {
 		this.repositoryType = t;
-		genericSQL = "SELECT o FROM "
-				+ repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1) + " o";
+		genericSQL = "SELECT o FROM " + repositoryType.getName().substring(repositoryType.getName().lastIndexOf('.') + 1)
+				+ " o";
 		logger.info("generic JPAQL: " + genericSQL);
-	}
-
+	}	
+	
 	// Repository query implementation
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#getById(java.lang.Object)
 	 */
 	@Override
@@ -77,9 +72,7 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 	}
 
 	// QBExample
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#get(T)
 	 */
 	@Override
@@ -141,9 +134,7 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#toCollection()
 	 */
 	@Override
@@ -154,9 +145,7 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 		return entityManager.createQuery(genericSQL).getResultList();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#toArray()
 	 */
 	@Override
@@ -173,22 +162,19 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 	}
 
 	// Repository transaction implementation
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#add(T)
 	 */
 	@Override
 	public T add(T entity) {
 		// em.getTransaction().begin();
 		try {
-			// provideUri(entity);
+//			provideUri(entity);
 			entityManager.merge(entity);
-			// entityManager.getTransaction().commit();
+			// em.getTransaction().commit();
 			return entity;
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.info("Error while trying to insert entity in database: " + e.getClass().getName());
 			// em.getTransaction().rollback();
 			return null;
 		} finally {
@@ -196,72 +182,67 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#addAll(java.util.Collection)
 	 */
 	@Override
 	public Collection<T> addAll(Collection<T> entities) {
-		// em.getTransaction().begin();
+//		em.getTransaction().begin();
 		try {
 			for (T entity : entities) {
-				// provideUri(entity);
+//				provideUri(entity);
 				entityManager.merge(entity);
 			}
-			// em.getTransaction().commit();
+//			em.getTransaction().commit();
 			return entities;
 		} catch (Exception e) {
 			e.printStackTrace();
-			// em.getTransaction().rollback();
+//			em.getTransaction().rollback();
 			return null;
-		}
-	}	
-
-	@Transactional
-	@Override
-	public boolean remove(String entityId) {
-		try {
-			logger.info("Searching for entity with id: " + entityId);
-			T entity = entityManager.find(repositoryType, entityId);
-			logger.info("Found: " + entity);
-			logger.info("remove this: merged." + entity+ ((Benefit) entity).getId());
-			entityManager.remove(entity);
-			logger.info("remove this: removed.");
-			entityManager.flush();
-			logger.info("remove this: flushed.");
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
+	 * @see org.app.patterns.EntityRepositoryService#remove(T)
+	 */
+	@Override
+	public boolean remove(T entity) {
+//		em.getTransaction().begin();
+		try {
+			entity = entityManager.merge(entity);
+			entityManager.remove(entity);
+//			em.getTransaction().commit();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+//			em.getTransaction().rollback();
+			return false;
+		} finally {
+			// em.close();
+		}
+	}
+
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#removeAll(java.util.Collection)
 	 */
 	@Override
 	public boolean removeAll(Collection<T> entities) {
-		// em.getTransaction().begin();
+//		em.getTransaction().begin();
 		try {
 			for (Object c : entities) {
 				entityManager.remove(c);
 			}
-			// em.getTransaction().commit();
+//			em.getTransaction().commit();
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			// em.getTransaction().rollback();
+//			em.getTransaction().rollback();
 			return false;
 		}
 	}
 
 	// Others
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#size()
 	 */
 	@Override
@@ -275,9 +256,7 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 		return size.intValue();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see org.app.patterns.EntityRepositoryService#refresh(T)
 	 */
 	@Override
@@ -286,23 +265,24 @@ public class EntityRepositoryBase<T extends Object> implements EntityRepository<
 		entityManager.refresh(entity);
 		return entity;
 	}
-
+	
+	
 	private Class<?> extractClassFromType(Type t) throws ClassCastException {
-		if (t instanceof Class<?>) {
-			return (Class<?>) t;
-		}
-		return (Class<?>) ((ParameterizedType) t).getRawType();
+	    if (t instanceof Class<?>) {
+	        return (Class<?>)t;
+	    }
+	    return (Class<?>)((ParameterizedType)t).getRawType();
 	}
 
 	public Class<T> getEntityParametrizedType() throws ClassCastException {
-		Class<?> superClass = getClass(); // initial value
-		Type superType;
-		do {
-			superType = superClass.getGenericSuperclass();
-			superClass = extractClassFromType(superType);
-		} while (!(superClass.equals(EntityRepositoryBase.class)));
+	    Class<?> superClass = getClass(); // initial value
+	    Type superType;
+	    do {
+	        superType = superClass.getGenericSuperclass();
+	        superClass = extractClassFromType(superType);
+	    } while (! (superClass.equals(EntityRepositoryBase.class)));
 
-		Type actualArg = ((ParameterizedType) superType).getActualTypeArguments()[0];
-		return (Class<T>) extractClassFromType(actualArg);
-	}
+	    Type actualArg = ((ParameterizedType)superType).getActualTypeArguments()[0];
+	    return (Class<T>)extractClassFromType(actualArg);
+	}		
 }

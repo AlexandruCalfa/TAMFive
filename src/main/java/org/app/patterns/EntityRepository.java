@@ -24,7 +24,7 @@ public interface EntityRepository<T extends Object> {
 
 	public abstract Collection<T> addAll(Collection<T> entities);
 
-	public abstract boolean remove(String entityId);
+	public abstract boolean remove(T entity);
 
 	public abstract boolean removeAll(Collection<T> entities);
 
