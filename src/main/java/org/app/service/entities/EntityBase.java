@@ -1,6 +1,6 @@
 package org.app.service.entities;
 
-public class EntityBase {
+public interface EntityBase {
 
-	
+	public  String getId();
 }

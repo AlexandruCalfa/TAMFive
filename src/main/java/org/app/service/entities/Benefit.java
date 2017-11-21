@@ -10,7 +10,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Benefit implements Comparable<Benefit>, Serializable{
+public class Benefit implements EntityBase, Comparable<Benefit>, Serializable{
+
+	public static final String START_DATE_FORMAT = "dd-MM-yyyy";
+	public static final String END_DATE_FORMAT = "dd-MM-yyyy";
 
 	@Id
 	private String id;
@@ -23,6 +26,7 @@ public class Benefit implements Comparable<Benefit>, Serializable{
 	@JoinColumn(name = "employee_id")
 	private Employee employee;
 
+	@Override
 	public String getId() {
 		return id;
 	}
